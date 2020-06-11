@@ -744,6 +744,84 @@ None
               - backup
 ```
 
+#### Percona XtraDB Cluster
+
+```yml
+---
+- hosts: all
+  roles:
+    - haproxy
+  vars:
+    haproxy_listen:
+      - name: stats
+        description: Global statistics
+        bind:
+          - listen: "{{ ansible_eth0['ipv4']['address'] }}:1936"
+        bind_process:
+          - 1
+        mode: http
+        stats:
+          enable: true
+          uri: /
+          options:
+            - hide-version
+            - show-desc
+          refresh: 5s
+          admin: if TRUE
+          auth:
+            - user: admin
+              passwd: 'Tt67z,8910zh.'
+      - name: mysql-cluster
+        description: Percona XtraDB Cluster
+        bind:
+          - listen: '{{ ansible_default_ipv4.address }}:3306'
+        mode: tcp
+        option:
+          - mysql-check
+          - user
+          - k3s
+        balance: roundrobin
+        option:
+          - httpchk
+        server:
+          - name: db01
+            listen: '10.104.100.171:3306'
+            param:
+              - check 
+              - port 
+              - 9200 
+              - inter 
+              - 12000 
+              - rise 
+              - 3 
+              - fall 
+              - 3
+          - name: db02
+            listen: '10.104.100.172:3306'
+            param:
+              - check 
+              - port 
+              - 9200 
+              - inter 
+              - 12000 
+              - rise 
+              - 3 
+              - fall 
+              - 3
+          - name: db03
+            listen: '10.104.100.173:3306'
+            param:
+              - check 
+              - port 
+              - 9200 
+              - inter 
+              - 12000 
+              - rise 
+              - 3 
+              - fall 
+              - 3
+```
+
 ## Overriding configuration template
 
 If you can't customize via variables because an option isn't exposed, you can override the template used to generate the haproxy configuration file.
